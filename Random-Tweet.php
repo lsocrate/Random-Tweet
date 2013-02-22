@@ -9,12 +9,16 @@ global $wpdb;
 new RandomTweet($wpdb);
 
 class RandomTweet {
+    const NAME = "Random Tweet";
+    const SLUG = "randomTweet";
+
     private $db;
 
     public function __construct(wpdb $database) {
         $this->db = $database;
 
         add_action("init", array(&$this, "setup_plugin"));
+        add_action("admin_menu", array(&$this, "add_menu_page"));
     }
 
     public function setup_plugin() {
@@ -29,5 +33,12 @@ class RandomTweet {
         );";
 
         dbDelta($sql);
+    }
+
+    public function showVisualizationPage() {
+    }
+
+    public function add_menu_page() {
+        add_menu_page(self::NAME, self::NAME, 'edit_posts', self::SLUG, array(&$this, "showVisualizationPage"), null, 22);
     }
 }
