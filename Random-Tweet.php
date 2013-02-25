@@ -11,6 +11,9 @@ new RandomTweet($wpdb);
 class RandomTweet {
     const NAME = "Random Tweet";
     const SLUG = "randomTweet";
+    const CUSTOM_POST_TYPE = 'randomtweet';
+    const CSS_EDITOR = "Random-Tweet/css/randomtweet-editor.css";
+    const JS_EDITOR = "Random-Tweet/js/randomtweet-editor.js";
 
     private $db;
 
@@ -18,27 +21,34 @@ class RandomTweet {
         $this->db = $database;
 
         add_action("init", array(&$this, "setup_plugin"));
-        add_action("admin_menu", array(&$this, "add_menu_page"));
+    }
+
+    public function showCharactersCountBox() {
+        wp_enqueue_script("randomtweet-editor", plugins_url(self::JS_EDITOR), "jquery", false, true);
+        wp_enqueue_style("randomtweet-editor", plugins_url(self::CSS_EDITOR));
+        ?>
+        <p class="charactercount-count">0</p>
+        <?php
+    }
+
+    public function setCustomPostTypeMetaboxes() {
+        add_meta_box("charcount", "Characters Count", array(&$this, "showCharactersCountBox"), self::CUSTOM_POST_TYPE, "side", "high");
     }
 
     public function setup_plugin() {
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-        $this->db->random_tweet = $this->db->prefix . "random_tweet";
-        $sql = "CREATE TABLE {$this->db->random_tweet} (
-          id INT NOT NULL AUTO_INCREMENT,
-          technology VARCHAR(255) NOT NULL,
-          UNIQUE KEY id (id),
-          UNIQUE KEY technology (technology)
-        );";
-
-        dbDelta($sql);
-    }
-
-    public function showVisualizationPage() {
-    }
-
-    public function add_menu_page() {
-        add_menu_page(self::NAME, self::NAME, 'edit_posts', self::SLUG, array(&$this, "showVisualizationPage"), null, 22);
+        $args = array(
+            "label" => "Random Tweets",
+            'labels' => array(
+                'singular_name' => 'Random Tweet',
+                'add_new_item' => 'Random Tweet',
+                'edit_item' => 'Edit Random Tweet'
+            ),
+            "public" => false,
+            "show_ui" => true,
+            "menu_position" => 21,
+            "supports" => array('title'),
+            "register_meta_box_cb" => array(&$this, "setCustomPostTypeMetaboxes")
+        );
+        register_post_type(self::CUSTOM_POST_TYPE, $args);
     }
 }
