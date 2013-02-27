@@ -54,10 +54,17 @@ module.exports = (grunt) ->
         files: [
           {expand: true, cwd: '/tmp/grunt/js/', src: '*', dest: 'js/', filter: 'isFile'}
         ]
+    watch:
+      scripts:
+        files: 'src/*.coffee'
+        tasks: ['clean-js', 'coffee', 'copy']
+        options:
+          interrupt: true
 
     grunt.loadNpmTasks('grunt-contrib-uglify')
     grunt.loadNpmTasks('grunt-contrib-coffee')
     grunt.loadNpmTasks('grunt-contrib-copy')
+    grunt.loadNpmTasks('grunt-contrib-watch')
 
     grunt.registerTask('clean-js', () ->
       dir = 'js'
@@ -70,9 +77,10 @@ module.exports = (grunt) ->
       __ENV__ = env
       config = grunt.config.data.go
       setupPhp(config.phpFileLocation)
-      grunt.task.run(['clean-js','coffee'])
+      grunt.task.run(['clean-js', 'coffee'])
       if __ENV__ is 'dev'
         grunt.task.run('copy')
+        grunt.task.run('watch')
       else if __ENV__ is 'prod'
         grunt.task.run('uglify')
     )
