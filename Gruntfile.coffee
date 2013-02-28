@@ -10,11 +10,10 @@ module.exports = (grunt) ->
     switch __ENV__
       when 'dev'
         if /\.min\.js$/.test(location)
-          location = location.replace(/\.js$/, '.min.js')
+          location = location.replace(/\.min\.js$/, '.js')
       when 'prod'
         unless /\.min\.js$/.test(location)
-          location = location.replace(/\.min\.js$/, '.js')
-
+          location = location.replace(/\.js$/, '.min.js')
     boilerplate + file + ' = "' + location + '";'
 
   setupPhp = (file) ->
