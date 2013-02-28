@@ -1,7 +1,6 @@
 module.exports = (grunt) ->
   # MODULES
   fs = require('fs')
-  path = require("path")
 
   # ENVIRONMENT
   __ENV__ = null
@@ -22,19 +21,6 @@ module.exports = (grunt) ->
     php = php.replace(/(\s*const )(JS_EDITOR)[^;]*"([^;]*)";/, setContantToCorrectJsForEnvironment, 'm')
     fs.writeFileSync(file, php)
 
-  rmdir = (dir) ->
-    list = fs.readdirSync(dir)
-    for content in list
-      filename = path.join(dir, content)
-      stat = fs.statSync(filename)
-
-      if filename is '.' or filename is '..'
-      else if stat.isDirectory()
-        rmdir(filename)
-      else
-        fs.unlinkSync(filename)
-    fs.rmdirSync(dir)
-
   # Config
   grunt.initConfig(
     pkg: grunt.file.readJSON('package.json')
@@ -43,44 +29,51 @@ module.exports = (grunt) ->
     coffee:
       compile:
         files:
-          '/tmp/grunt/js/randomtweet-editor.js': 'src/randomtweet-editor.coffee'
+          '/tmp/grunt/Random-Tweet/js/randomtweet-editor.js': 'src/randomtweet-editor.coffee'
     uglify:
       editor:
-        src: '/tmp/grunt/js/randomtweet-editor.js'
+        src: '/tmp/grunt/Random-Tweet/js/randomtweet-editor.js'
         dest: 'js/randomtweet-editor.min.js'
     copy:
       main:
         files: [
-          {expand: true, cwd: '/tmp/grunt/js/', src: '*', dest: 'js/', filter: 'isFile'}
+          {expand: true, cwd: '/tmp/grunt/Random-Tweet/js/', src: '*', dest: 'js/', filter: 'isFile'}
         ]
+    clean: ["js"]
     watch:
       scripts:
         files: 'src/*.coffee'
-        tasks: ['clean-js', 'coffee', 'copy']
+        tasks: ['clean', 'coffee', 'copy']
         options:
           interrupt: true
+    compress:
+      package:
+        options:
+          archive: 'builds/Random-Tweet-<%= pkg.version %>.zip'
+        files: [
+          {src:['*.php', '*.md', 'css/**', 'js/**']}
+        ]
 
     grunt.loadNpmTasks('grunt-contrib-uglify')
     grunt.loadNpmTasks('grunt-contrib-coffee')
     grunt.loadNpmTasks('grunt-contrib-copy')
     grunt.loadNpmTasks('grunt-contrib-watch')
-
-    grunt.registerTask('clean-js', () ->
-      dir = 'js'
-      rmdir(dir)
-      fs.mkdirSync(dir)
-      grunt.log.writeln("Js directory clean!").ok()
-    )
+    grunt.loadNpmTasks('grunt-contrib-clean')
+    grunt.loadNpmTasks('grunt-contrib-compress')
 
     grunt.registerTask('go', 'Switch environments', (env) ->
       __ENV__ = env
       config = grunt.config.data.go
       setupPhp(config.phpFileLocation)
-      grunt.task.run(['clean-js', 'coffee'])
+      grunt.task.run(['clean', 'coffee'])
       if __ENV__ is 'dev'
         grunt.task.run('copy')
         grunt.task.run('watch')
       else if __ENV__ is 'prod'
         grunt.task.run('uglify')
+    )
+
+    grunt.registerTask('package', 'Make deployment package', ->
+      grunt.task.run(['go:prod', 'compress:package'])
     )
   )
