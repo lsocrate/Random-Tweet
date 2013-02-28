@@ -51,4 +51,19 @@ class RandomTweet {
         );
         register_post_type(self::CUSTOM_POST_TYPE, $args);
     }
+
+    private function getRandomTweets($qty) {
+        $args = array(
+            'post_type' => self::CUSTOM_POST_TYPE,
+            'orderby' => 'rand'
+        );
+
+        if ($qty) {
+            $args['numberposts'] = (int) $qty;
+        }
+
+        $posts = get_posts($args);
+
+        return $posts;
+    }
 }
