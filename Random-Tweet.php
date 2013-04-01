@@ -20,7 +20,7 @@ class RandomTweet {
     const SLUG = "randomTweet";
     const CUSTOM_POST_TYPE = 'randomtweet';
     const CSS_EDITOR = "Random-Tweet/css/randomtweet-editor.css";
-    const JS_EDITOR = "Random-Tweet/js/randomtweet-editor.js";
+    const JS_EDITOR = "Random-Tweet/js/randomtweet-editor.min.js";
     const TWITTER_ACCOUNT = 'envisioningtech';
     const SHORTCODE = '{{random-tweet}}';
 
